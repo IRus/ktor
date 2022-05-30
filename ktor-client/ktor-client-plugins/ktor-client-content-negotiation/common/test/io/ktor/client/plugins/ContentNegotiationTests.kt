@@ -312,6 +312,33 @@ class ContentNegotiationTests {
         }
     }
 
+    @Test
+    fun testSendOutgoingContent() = testWithEngine(MockEngine) {
+        config {
+            install(ContentNegotiation) {
+                register(ContentType.Application.Json, TestContentConverter()) {
+                    deserializeFn = { _, _, _ -> fail() }
+                    serializeFn = { _, _, _, _ -> fail() }
+                }
+            }
+            engine {
+                addHandler {
+                    respond(
+                        content = """{"x": 123}""",
+                        headers = headersOf(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    )
+                }
+            }
+        }
+
+        test { client ->
+            val response = client.post("/post") {
+                setBody(TextContent("""{"x": 123}""", ContentType.Application.Json))
+            }.bodyAsText()
+            assertEquals("""{"x": 123}""", response)
+        }
+    }
+
     object Thing
 
     data class StringWrapper(val value: String)
