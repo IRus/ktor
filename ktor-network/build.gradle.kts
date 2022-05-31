@@ -1,13 +1,13 @@
 description = "Ktor network utilities"
 
 kotlin {
-    nixTargets().forEach {
-        it.compilations.getByName("main").cinterops {
-            create("network") {
-                defFile = projectDir.resolve("nix/interop/network.def")
-            }
-        }
-    }
+//    nixTargets().forEach {
+//        it.compilations.getByName("main").cinterops {
+//            create("network") {
+//                defFile = projectDir.resolve("nix/interop/network.def")
+//            }
+//        }
+//    }
 
     sourceSets {
         jvmAndNixMain {
@@ -16,7 +16,7 @@ kotlin {
             }
         }
 
-        val jvmAndNixTest by getting {
+        jvmAndNixTest {
             dependencies {
                 api(project(":ktor-test-dispatcher"))
             }

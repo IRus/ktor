@@ -5,10 +5,10 @@ import org.jetbrains.kotlin.gradle.dsl.*
 import org.jetbrains.kotlin.gradle.plugin.mpp.*
 import org.jetbrains.kotlin.konan.target.*
 
-fun KotlinMultiplatformExtension.createIdeaTarget(name: String): KotlinNativeTarget = when (HostManager.host) {
-    is KonanTarget.LINUX_X64 -> linuxX64(name)
-    is KonanTarget.MACOS_X64 -> macosX64(name)
-    is KonanTarget.MACOS_ARM64 -> macosArm64(name)
-    is KonanTarget.MINGW_X64 -> mingwX64(name)
+fun KotlinMultiplatformExtension.ideaTarget(): KotlinNativeTarget = when (HostManager.host) {
+    is KonanTarget.LINUX_X64 -> linuxX64()
+    is KonanTarget.MACOS_X64 -> macosX64()
+    is KonanTarget.MACOS_ARM64 -> macosArm64()
+    is KonanTarget.MINGW_X64 -> mingwX64()
     else -> error("Unsupported target ${HostManager.host}")
 }

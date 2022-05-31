@@ -1,7 +1,11 @@
-kotlin.sourceSets {
-    darwinMain {
-        dependencies {
-            api(project(":ktor-client:ktor-client-darwin"))
+kotlin {
+    jvm()
+
+    sourceSets {
+        darwinMain {
+            dependencies {
+                api(project(":ktor-client:ktor-client-darwin"))
+            }
         }
     }
 }

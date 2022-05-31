@@ -81,7 +81,9 @@ public class NettyApplicationEngine(
         /**
          * User-provided function to configure Netty's [ChannelPipeline]
          */
-        public var channelPipelineConfig: ChannelPipeline.() -> Unit = {}
+        public var channelPipelineConfig: ChannelPipeline.() -> Unit = {
+            channel().config().isAutoRead = false
+        }
     }
 
     private val configuration = Configuration().apply(configure)

@@ -12,4 +12,51 @@ fun Project.kotlin(block: KotlinMultiplatformExtension.() -> Unit) {
 }
 
 val Project.kotlin: KotlinMultiplatformExtension get() = the()
+
 val Project.kotlinter: KotlinterExtension get() = the()
+
+fun NamedDomainObjectContainer<KotlinSourceSet>.jvmAndNixMain(block: KotlinSourceSet.() -> Unit) {
+    val sourceSet = findByName("jvmAndNixMain") ?: getByName("jvmMain")
+    block(sourceSet)
+}
+
+fun NamedDomainObjectContainer<KotlinSourceSet>.jvmAndNixTest(block: KotlinSourceSet.() -> Unit) {
+    val sourceSet = findByName("jvmAndNixTest") ?: getByName("jvmTest")
+    block(sourceSet)
+}
+
+fun NamedDomainObjectContainer<KotlinSourceSet>.posixMain(block: KotlinSourceSet.() -> Unit) {
+    val sourceSet = findByName("posixMain") ?: return
+    block(sourceSet)
+}
+
+fun NamedDomainObjectContainer<KotlinSourceSet>.darwinMain(block: KotlinSourceSet.() -> Unit) {
+    val sourceSet = findByName("darwinMain") ?: return
+    block(sourceSet)
+}
+
+fun NamedDomainObjectContainer<KotlinSourceSet>.darwinTest(block: KotlinSourceSet.() -> Unit) {
+    val sourceSet = findByName("darwinTest") ?: return
+    block(sourceSet)
+}
+
+fun NamedDomainObjectContainer<KotlinSourceSet>.jsMain(block: KotlinSourceSet.() -> Unit) {
+    val sourceSet = findByName("jsMain") ?: return
+    block(sourceSet)
+}
+
+fun NamedDomainObjectContainer<KotlinSourceSet>.jsTest(block: KotlinSourceSet.() -> Unit) {
+    val sourceSet = findByName("jsTest") ?: return
+    block(sourceSet)
+}
+
+fun NamedDomainObjectContainer<KotlinSourceSet>.desktopMain(block: KotlinSourceSet.() -> Unit) {
+    val sourceSet = findByName("desktopMain") ?: return
+    block(sourceSet)
+}
+
+fun NamedDomainObjectContainer<KotlinSourceSet>.desktopTest(block: KotlinSourceSet.() -> Unit) {
+    val sourceSet = findByName("desktopTest") ?: return
+    block(sourceSet)
+}
+

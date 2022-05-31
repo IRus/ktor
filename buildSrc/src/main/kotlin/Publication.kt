@@ -54,6 +54,8 @@ fun isAvailableForPublication(publication: Publication): Boolean {
 }
 
 fun Project.configurePublication() {
+    if (FAST_MODE) return
+
     apply(plugin = "maven-publish")
 
     tasks.withType<AbstractPublishToMaven>().all {

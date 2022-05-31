@@ -5,62 +5,63 @@
 import org.jetbrains.kotlin.gradle.dsl.*
 import org.jetbrains.kotlin.gradle.plugin.mpp.*
 
-fun KotlinMultiplatformExtension.posixTargets(): Set<KotlinNativeTarget> =
-    nixTargets() + mingwX64()
+val FAST_MODE = true
 
-fun KotlinMultiplatformExtension.nixTargets(): Set<KotlinNativeTarget> =
-    darwinTargets() + linuxX64()
+fun fastOr(block: () -> List<String>): List<String> {
+    if (FAST_MODE) return emptyList()
+    return block()
+}
 
-fun KotlinMultiplatformExtension.darwinTargets(): Set<KotlinNativeTarget> = setOf(
-    iosX64(),
-    iosArm64(),
-    iosArm32(),
-    iosSimulatorArm64(),
+fun KotlinMultiplatformExtension.posixTargets(): List<String> = fastOr { nixTargets() + mingwX64().name }
 
-    watchosX86(),
-    watchosX64(),
-    watchosArm32(),
-    watchosArm64(),
-    watchosSimulatorArm64(),
+fun KotlinMultiplatformExtension.nixTargets(): List<String> = fastOr {
+    darwinTargets() + linuxX64().name
+}
 
-    tvosX64(),
-    tvosArm64(),
-    tvosSimulatorArm64(),
+fun KotlinMultiplatformExtension.darwinTargets(): List<String> = fastOr {
+    macosTargets() + iosTargets() + watchosTargets() + tvosTargets()
+}
 
-    macosX64(),
-    macosArm64()
-)
+fun KotlinMultiplatformExtension.macosTargets(): List<String> = fastOr {
+    listOf(
+        macosX64(),
+        macosArm64()
+    ).map { it.name }
+}
+
+fun KotlinMultiplatformExtension.iosTargets(): List<String> = fastOr {
+    listOf(
+        iosX64(),
+        iosArm64(),
+        iosArm32(),
+        iosSimulatorArm64(),
+    ).map { it.name }
+}
 
 
-fun KotlinMultiplatformExtension.macosTargets(): Set<KotlinNativeTarget> = setOf(
-    macosX64(),
-    macosArm64()
-)
+fun KotlinMultiplatformExtension.watchosTargets(): List<String> = fastOr {
+    listOf(
+        watchosX86(),
+        watchosX64(),
+        watchosArm32(),
+        watchosArm64(),
+        watchosSimulatorArm64(),
+    ).map { it.name }
+}
 
-fun KotlinMultiplatformExtension.iosTargets(): Set<KotlinNativeTarget> = setOf(
-    iosX64(),
-    iosArm64(),
-    iosArm32(),
-    iosSimulatorArm64(),
-)
+fun KotlinMultiplatformExtension.tvosTargets(): List<String> = fastOr {
+    listOf(
+        tvosX64(),
+        tvosArm64(),
+        tvosSimulatorArm64(),
+    ).map { it.name }
+}
 
-fun KotlinMultiplatformExtension.watchosTargets(): Set<KotlinNativeTarget> = setOf(
-    watchosX86(),
-    watchosX64(),
-    watchosArm32(),
-    watchosArm64(),
-    watchosSimulatorArm64(),
-)
-
-fun KotlinMultiplatformExtension.tvosTargets(): Set<KotlinNativeTarget> = setOf(
-    tvosX64(),
-    tvosArm64(),
-    tvosSimulatorArm64(),
-)
-
-fun KotlinMultiplatformExtension.desktopTargets(): Set<KotlinNativeTarget> = setOf(
-    macosX64(),
-    macosArm64(),
-    linuxX64(),
-    mingwX64()
-)
+fun KotlinMultiplatformExtension.desktopTargets(): List<String> = fastOr {
+    listOf(
+        macosX64(),
+        macosArm64(),
+        linuxX64(),
+        mingwX64()
+    ).map { it.name }
+}
