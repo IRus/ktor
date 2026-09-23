@@ -145,6 +145,8 @@ dokka-gradlePlugin = { module = "org.jetbrains.dokka:dokka-gradle-plugin", versi
 dokka-plugin-versioning = { module = "org.jetbrains.dokka:versioning-plugin", version.ref = "dokka" }
 
 netty-handler = { module = "io.netty:netty-handler", version.ref = "netty" }
+netty-handler-proxy = { module = "io.netty:netty-handler-proxy", version.ref = "netty" }
+netty-codec-http = { module = "io.netty:netty-codec-http", version.ref = "netty" }
 netty-codec = { module = "io.netty:netty-codec", version.ref = "netty" }
 netty-codec-http2 = { module = "io.netty:netty-codec-http2", version.ref = "netty" }
 netty-codec-http3 = { module = "io.netty:netty-codec-http3", version.ref = "netty" }

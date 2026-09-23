@@ -23,6 +23,7 @@ kotlin {
                 runtimeOnly(project(":ktor-client-apache"))
                 runtimeOnly(project(":ktor-client-cio"))
                 runtimeOnly(project(":ktor-client-android"))
+                runtimeOnly(project(":ktor-client-netty"))
 
                 val jvmToolchain = ktorBuild.jvmTestToolchain.get()
                 val java11 = JavaLanguageVersion.of(11)

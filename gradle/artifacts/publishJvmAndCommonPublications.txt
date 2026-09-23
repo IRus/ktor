@@ -162,6 +162,13 @@ io.ktor:ktor-client-mock/.jar
 io.ktor:ktor-client-mock/javadoc.jar
 io.ktor:ktor-client-mock/kotlin-tooling-metadata.json
 io.ktor:ktor-client-mock/sources.jar
+io.ktor:ktor-client-netty-jvm/.jar
+io.ktor:ktor-client-netty-jvm/javadoc.jar
+io.ktor:ktor-client-netty-jvm/sources.jar
+io.ktor:ktor-client-netty/.jar
+io.ktor:ktor-client-netty/javadoc.jar
+io.ktor:ktor-client-netty/kotlin-tooling-metadata.json
+io.ktor:ktor-client-netty/sources.jar
 io.ktor:ktor-client-okhttp-jvm/.jar
 io.ktor:ktor-client-okhttp-jvm/javadoc.jar
 io.ktor:ktor-client-okhttp-jvm/sources.jar

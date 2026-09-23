@@ -43,6 +43,7 @@ kotlin {
             implementation(projects.ktorClientApache5)
             runtimeOnly(projects.ktorClientAndroid)
             runtimeOnly(projects.ktorClientOkhttp)
+            runtimeOnly(projects.ktorClientNetty)
             implementation(libs.kotlinx.coroutines.slf4j)
             implementation(libs.junit)
 

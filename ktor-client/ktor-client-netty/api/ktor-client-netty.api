@@ -1,0 +1,39 @@
+public final class io/ktor/client/engine/netty/Netty : io/ktor/client/engine/HttpClientEngineFactory {
+	public static final field INSTANCE Lio/ktor/client/engine/netty/Netty;
+	public fun create (Lkotlin/jvm/functions/Function1;)Lio/ktor/client/engine/HttpClientEngine;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/ktor/client/engine/netty/NettyClientEngineConfig : io/ktor/client/engine/HttpClientEngineConfig {
+	public fun <init> ()V
+	public final fun bootstrap (Lkotlin/jvm/functions/Function1;)V
+	public final fun getConnectTimeout ()J
+	public final fun getEventLoopGroup ()Lio/netty/channel/EventLoopGroup;
+	public final fun getKeepAliveTime ()J
+	public final fun getMaxChunkSize ()I
+	public final fun getMaxConnectionsPerRoute ()I
+	public final fun getMaxHeaderSize ()I
+	public final fun getMaxInitialLineLength ()I
+	public final fun getSocketTimeout ()J
+	public final fun getSslContext ()Lio/netty/handler/ssl/SslContext;
+	public final fun setConnectTimeout (J)V
+	public final fun setEventLoopGroup (Lio/netty/channel/EventLoopGroup;)V
+	public final fun setKeepAliveTime (J)V
+	public final fun setMaxChunkSize (I)V
+	public final fun setMaxConnectionsPerRoute (I)V
+	public final fun setMaxHeaderSize (I)V
+	public final fun setMaxInitialLineLength (I)V
+	public final fun setSocketTimeout (J)V
+	public final fun setSslContext (Lio/netty/handler/ssl/SslContext;)V
+	public final fun sslContext (Lkotlin/jvm/functions/Function1;)V
+}
+
+public final class io/ktor/client/engine/netty/NettyEngineContainer : io/ktor/client/HttpClientEngineContainer {
+	public fun <init> ()V
+	public fun getFactory ()Lio/ktor/client/engine/HttpClientEngineFactory;
+	public fun getPriority ()D
+	public fun toString ()Ljava/lang/String;
+}
+

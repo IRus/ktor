@@ -18,7 +18,7 @@ import kotlin.time.Duration.Companion.seconds
 
 private const val FRAMES_COUNT = 100
 
-private val NON_CALLBACK_BASED_WS_CLIENTS = listOf("CIO", "Darwin", "Java", "WinHttp")
+private val NON_CALLBACK_BASED_WS_CLIENTS = listOf("CIO", "Darwin", "Java", "Netty", "WinHttp")
 private val CALLBACK_BASED_WS_CLIENTS = listOf("OkHttp", "JS", "Curl")
 
 class WebSocketBackpressureTest : ClientLoader(except(ENGINES_WITHOUT_WS)) {
