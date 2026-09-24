@@ -350,7 +350,7 @@ class ContentTest : ClientLoader(timeout = 1.minutes) {
     }
 
     @Test
-    fun testDownloadStreamResponseWithClose() = clientTests(only("CIO")) {
+    fun testDownloadStreamResponseWithClose() = clientTests(EngineSelectionRule { it == "CIO" || it == "Netty" }) {
         test { client ->
             client.prepareGet("$TEST_SERVER/content/stream").execute {
             }

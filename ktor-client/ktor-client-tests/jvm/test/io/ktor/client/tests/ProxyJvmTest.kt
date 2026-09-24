@@ -15,7 +15,7 @@ import kotlin.test.assertEquals
 class ProxyJvmTest : ClientLoader() {
 
     @Test
-    fun globalProxyProperty() = clientTests(only("CIO")) {
+    fun globalProxyProperty() = clientTests(CIO_AND_NETTY) {
         val proxyUrl = Url(TCP_SERVER)
         System.setProperty("http.proxyHost", proxyUrl.host)
         System.setProperty("http.proxyPort", proxyUrl.port.toString())
@@ -32,7 +32,7 @@ class ProxyJvmTest : ClientLoader() {
     }
 
     @Test
-    fun configuredProxyHasPriorityOverGlobalOne() = clientTests(only("CIO")) {
+    fun configuredProxyHasPriorityOverGlobalOne() = clientTests(CIO_AND_NETTY) {
         System.setProperty("http.proxyHost", "localhost")
         System.setProperty("http.proxyPort", "1")
 
@@ -53,3 +53,5 @@ class ProxyJvmTest : ClientLoader() {
         }
     }
 }
+
+private val CIO_AND_NETTY = EngineSelectionRule { it == "CIO" || it == "Netty" }
