@@ -2,3 +2,91 @@ package=io.ktor.server.engine.interop
 ---
 
 extern char **environ;
+
+#include <errno.h>
+#include <fcntl.h>
+#include <pthread.h>
+#include <signal.h>
+#include <stdatomic.h>
+#include <unistd.h>
+
+// The handler must never enter the Kotlin runtime or acquire a lock.
+static _Atomic int ktor_shutdown_write_fd = -1;
+static int ktor_shutdown_read_fd = -1;
+static void (*ktor_shutdown_callback)(void);
+
+static void ktor_shutdown_signal_handler(int signo) {
+    int saved_errno = errno;
+    int fd = atomic_load_explicit(&ktor_shutdown_write_fd, memory_order_relaxed);
+    char notification = 1;
+    while (write(fd, &notification, 1) == -1 && errno == EINTR) {}
+    // EAGAIN means the pipe is full, so a shutdown notification is already pending.
+    errno = saved_errno;
+}
+
+static void *ktor_shutdown_listener(void *unused) {
+    char notification;
+    for (;;) {
+        ssize_t result = read(ktor_shutdown_read_fd, &notification, 1);
+        if (result == 1) {
+            ktor_shutdown_callback();
+        } else if (result != -1 || errno != EINTR) {
+            return NULL;
+        }
+    }
+}
+
+// Called once, before installing any handlers. The pipe and detached listener live until process exit:
+// closing a published descriptor could race a signal handler and write to a reused descriptor.
+static int ktor_shutdown_hook_init(void (*callback)(void)) {
+    // Android ARM32 determines lock freedom at runtime rather than through ATOMIC_INT_LOCK_FREE.
+    if (!atomic_is_lock_free(&ktor_shutdown_write_fd)) return ENOTSUP;
+    int fds[2];
+    if (pipe(fds) != 0) return errno;
+    int error;
+    if (fcntl(fds[0], F_SETFD, FD_CLOEXEC) == -1 ||
+        fcntl(fds[1], F_SETFD, FD_CLOEXEC) == -1) {
+        error = errno;
+        goto fail;
+    }
+    int flags = fcntl(fds[1], F_GETFL);
+    if (flags == -1 || fcntl(fds[1], F_SETFL, flags | O_NONBLOCK) == -1) {
+        error = errno;
+        goto fail;
+    }
+    pthread_attr_t attr;
+    error = pthread_attr_init(&attr);
+    if (error != 0) goto fail;
+    error = pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+    if (error != 0) {
+        pthread_attr_destroy(&attr);
+        goto fail;
+    }
+    ktor_shutdown_read_fd = fds[0];
+    ktor_shutdown_callback = callback;
+    pthread_t thread;
+    error = pthread_create(&thread, &attr, ktor_shutdown_listener, NULL);
+    pthread_attr_destroy(&attr);
+    if (error != 0) goto fail;
+    atomic_store_explicit(&ktor_shutdown_write_fd, fds[1], memory_order_relaxed);
+    return 0;
+fail:
+    close(fds[0]);
+    close(fds[1]);
+    return error;
+}
+
+static int ktor_shutdown_hook_install(void) {
+    struct sigaction action = {0};
+    struct sigaction previous;
+    action.sa_handler = ktor_shutdown_signal_handler;
+    sigemptyset(&action.sa_mask);
+    action.sa_flags = SA_RESTART;
+    if (sigaction(SIGINT, &action, &previous) != 0) return errno;
+    if (sigaction(SIGTERM, &action, NULL) != 0) {
+        int error = errno;
+        sigaction(SIGINT, &previous, NULL);
+        return error;
+    }
+    return 0;
+}

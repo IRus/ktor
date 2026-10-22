@@ -22,11 +22,12 @@ internal expect val SHUTDOWN_HOOK_ENABLED: Boolean
  *   concurrently. Do not rely on registration order.
  * - On JS, callbacks run in registration order (FIFO) for each signal type (`SIGINT`, `SIGTERM`).
  *   Each call adds two listeners (one per signal); only listeners for the received signal run.
- * - On Native, the last registered callback wins.
+ * - On Native, the last registered callback wins. On Unix, it runs on a dedicated thread outside the signal handler.
+ *   On Windows, it runs directly in the signal handler.
  *
  * **What initiates shutdown**
  * - The external cause is a termination signal from the OS or runtime.
- * - The [stop] block is not a subscriber to lifecycle events. When invoked by the signal handler, it
+ * - The [stop] block is not a subscriber to lifecycle events. When invoked in response to a signal, it
  *   initiates graceful shutdown (typically by calling [EmbeddedServer.stop]), which then raises stop
  *   lifecycle events. Subscribers to [io.ktor.server.application.ApplicationStopping] and related events
  *   react to shut down already in progress; they do not replace [addShutdownHook] for signal handling.

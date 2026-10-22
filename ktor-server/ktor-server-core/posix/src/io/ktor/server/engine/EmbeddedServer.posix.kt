@@ -9,6 +9,7 @@ import io.ktor.events.EventDefinition
 import io.ktor.server.application.*
 import io.ktor.server.engine.internal.*
 import io.ktor.utils.io.InternalAPI
+import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.*
 
 public actual class EmbeddedServer<
@@ -46,6 +47,8 @@ actual constructor(
 
     private val modules = rootConfig.modules
 
+    internal val shutdownHookCompletion = atomic<ShutdownHook?>(null)
+
     public actual fun start(wait: Boolean): EmbeddedServer<TEngine, TConfiguration> {
         addShutdownHook { stop() }
 
@@ -73,6 +76,10 @@ actual constructor(
         }
 
         engine.start(wait)
+        if (wait) {
+            // Engine termination can unblock start before the signal callback has returned.
+            shutdownHookCompletion.value?.awaitCompletion()
+        }
 
         return this
     }

@@ -1,0 +1,74 @@
+package=io.ktor.server.engine.test.interop
+---
+
+/*
+ * Copyright 2014-2026 JetBrains s.r.o and contributors. Use of this source code is governed by the Apache 2.0 license.
+ */
+
+#include <errno.h>
+#include <fcntl.h>
+#include <limits.h>
+#include <spawn.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/wait.h>
+#include <unistd.h>
+#ifdef __APPLE__
+#include <mach-o/dyld.h>
+#endif
+
+extern char **environ;
+
+// Test-only bridge: posix_spawn's opaque file-action type differs between Linux and Darwin.
+static int ktor_test_spawn(const char *mode, int input_fd, int output_fd, int *child_pid) {
+    char executable[PATH_MAX];
+#ifdef __APPLE__
+    uint32_t size = sizeof(executable);
+    if (_NSGetExecutablePath(executable, &size) != 0) return ENAMETOOLONG;
+#else
+    ssize_t size = readlink("/proc/self/exe", executable, sizeof(executable) - 1);
+    if (size < 0) return errno;
+    if ((size_t)size >= sizeof(executable) - 1) return ENAMETOOLONG;
+    executable[size] = '\0';
+#endif
+    char mode_env[128];
+    int length = snprintf(mode_env, sizeof(mode_env), "KTOR_SHUTDOWN_CHILD=%s", mode);
+    if (length < 0 || (size_t)length >= sizeof(mode_env)) return EINVAL;
+    size_t count = 0;
+    while (environ[count]) count++;
+    char **child_env = calloc(count + 2, sizeof(char *));
+    if (!child_env) return ENOMEM;
+    size_t copied = 0;
+    for (size_t i = 0; i < count; i++) {
+        if (strncmp(environ[i], "KTOR_SHUTDOWN_CHILD=", sizeof("KTOR_SHUTDOWN_CHILD=") - 1) != 0) {
+            child_env[copied++] = environ[i];
+        }
+    }
+    child_env[copied] = mode_env;
+    char *args[] = {executable, "--ktest_filter=io.ktor.server.engine.NativeShutdownHookTestChild.child", NULL};
+    posix_spawn_file_actions_t actions;
+    int result = posix_spawn_file_actions_init(&actions);
+    if (result != 0) {
+        free(child_env);
+        return result;
+    }
+    if (fcntl(input_fd, F_SETFD, FD_CLOEXEC) == -1 || fcntl(output_fd, F_SETFD, FD_CLOEXEC) == -1) {
+        result = errno;
+        goto done;
+    }
+    if ((result = posix_spawn_file_actions_adddup2(&actions, input_fd, STDIN_FILENO)) != 0) goto done;
+    if ((result = posix_spawn_file_actions_adddup2(&actions, output_fd, STDOUT_FILENO)) != 0) goto done;
+    if ((result = posix_spawn_file_actions_adddup2(&actions, output_fd, STDERR_FILENO)) != 0) goto done;
+    pid_t pid;
+    result = posix_spawn(&pid, executable, &actions, NULL, args, child_env);
+    if (result == 0) *child_pid = pid;
+done:
+    posix_spawn_file_actions_destroy(&actions);
+    free(child_env);
+    return result;
+}
+
+static int ktor_test_exit_code(int status) {
+    return WIFEXITED(status) ? WEXITSTATUS(status) : -1;
+}

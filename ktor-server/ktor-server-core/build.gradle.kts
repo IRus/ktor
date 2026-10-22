@@ -3,6 +3,9 @@
  */
 
 import ktorbuild.createCInterop
+import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
+import org.jetbrains.kotlin.konan.target.Family
+import org.jetbrains.kotlin.konan.target.HostManager
 
 description = ""
 
@@ -14,7 +17,24 @@ plugins {
 kotlin {
     createCInterop("host_common", sourceSet = "nix")
 
+    targets.withType<KotlinNativeTarget>().matching {
+        it.konanTarget == HostManager.host && it.konanTarget.family in listOf(Family.LINUX, Family.OSX)
+    }.configureEach {
+        compilations.named("test") {
+            // Host process tests use only native test outputs, without compiling the JVM test suite.
+            defaultSourceSet.kotlin.srcDir("nix/test-process")
+            cinterops.create("shutdown_test") {
+                definitionFile = project.layout.projectDirectory.file("nix/interop/shutdown_test.def")
+            }
+        }
+    }
+
     sourceSets {
+        named("nixTest") {
+            // Exercise internal hook registration and completion with a real server engine.
+            dependencies { implementation(projects.ktorServerCio) }
+        }
+
         commonMain.dependencies {
             api(projects.ktorUtils)
             api(projects.ktorHttp)
